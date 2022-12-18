@@ -1,0 +1,123 @@
+Prelude {
+
+use self::SyntaxTree::*;
+
+#[derive(Copy, Clone, Eq, PartialEq, Debug, Hash)]
+pub enum Token_ {
+    LeftBracket,
+    RightBracket,
+    Var,
+    And,
+    Or,
+    Xor,
+    Not,
+    Eof,
+    Eps,
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Debug, Hash)]
+pub enum NotTerminal {
+    X,
+    X_,
+    O,
+    O_,
+    A,
+    A_,
+    N,
+    T,
+}
+
+#[derive(Clone, Eq, PartialEq, Debug)]
+pub enum SyntaxTree {
+    Leaf(Token_),
+    Tree(NotTerminal, Vec<SyntaxTree>),
+}
+
+
+}
+
+Skip {
+   "\n";
+   "\r";
+   " ";
+}
+
+Tokens {
+    Xor -> "xor";
+    Or -> "or";
+    And -> "and";
+    Not -> "not";
+    Var -> "[a-zA-Z]";
+    LB -> "\\(";
+    RB -> "\\)";
+}
+
+NotTerminals {
+   S {} {tree # SyntaxTree} -> X {tree = X0_tree;};
+
+   X {} {tree # SyntaxTree} -> O Xx
+   {
+       tree = Tree(NotTerminal::X, vec!(O0_tree, Xx1_tree));
+   };
+
+   Xx {} {tree # SyntaxTree} ->
+   Xor O Xx 
+   {
+     tree = Tree(NotTerminal::X_, vec!(Leaf(Token_::Xor), O1_tree, Xx2_tree));
+   }
+   | 
+   {
+        tree = Tree(NotTerminal::X_, vec!(Leaf(Token_::Eps)));
+   };
+
+   O {} {tree # SyntaxTree} -> A Ox
+   {
+       tree = Tree(NotTerminal::O, vec!(A0_tree, Ox1_tree));
+   };
+
+   Ox {} {tree # SyntaxTree} -> Or A Ox
+   {
+       tree = Tree(NotTerminal::O_, vec!(Leaf(Token_::Or), A1_tree, Ox2_tree));
+   }
+   |
+   {
+       tree = Tree(NotTerminal::O_, vec!(Leaf(Token_::Eps)));
+   };
+
+   A {} {tree # SyntaxTree} -> N Ax
+   {
+      tree = Tree(NotTerminal::A, vec!(N0_tree, Ax1_tree));
+   };
+
+   Ax {} {tree # SyntaxTree} -> And N Ax
+   {
+     tree = Tree(NotTerminal::A_, vec!(Leaf(Token_::And), N1_tree, Ax2_tree));
+   }
+   |
+    {
+      tree = Tree(NotTerminal::A_, vec!(Leaf(Token_::Eps)));
+    };
+
+   N {} {tree # SyntaxTree} ->
+   Not T 
+   {
+     tree = Tree(NotTerminal::N, vec!(Leaf(Token_::Not), T1_tree));
+   } 
+   | 
+   T
+   {
+     tree = Tree(NotTerminal::N, vec!(T0_tree));
+   };
+
+   T {} {tree # SyntaxTree} ->
+   Var 
+   {
+     tree = Tree(NotTerminal::T, vec!(Leaf(Token_::Var)));
+   } 
+   | 
+   LB X RB
+   {
+     tree = Tree(NotTerminal::T, vec!(Leaf(Token_::LeftBracket), X1_tree, Leaf(Token_::RightBracket)));
+   }
+   ;
+}
