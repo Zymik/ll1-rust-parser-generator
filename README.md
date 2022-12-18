@@ -1,8 +1,7 @@
 # ll1-rust-parser-generator
-LL1 grammar parser generator in Rust. It's an partly anlagoue of ANTLR that generate code for parsing in Rust. 
-Generator support synthesized and inherited attributes. You can set tokens for lexical analysis and characters to skip as regex.
-
+LL1 grammar parser generator in Rust. It's a partly analogue of ANTLR that generates code for parsing in Rust. Generator supports synthesized and inherited attributes. You can set tokens for lexical analysis and characters to skip as regex.
 Grammar for calculator with +,-,*,/ and combinations example:
+
 
 ```
 Prelude {
@@ -70,10 +69,11 @@ NotTerminals {
 }
 ```
 Parser Description format:
- 1. 'Prelude' in the begginig will prepended to Parser source code. 
- It's a place where you should decribe imports, const and our functions
+ 1. 'Prelude' in the beginning will prepend to Parser source code. 
+ It's a place where you should describe imports, const and our functions
  2. 'Skip' describes skippable letters. It's a list of regexes, separated by ';'
- 3. 'Tokens' desribes tokens in which passed to parser string will be tokenized. It's list of `Token_Name -> "Regex"` separated by ';'
+ 3. 'Tokens' describes tokens in which passed to parser strings will be tokenized. It's list of `Token_Name -> "Regex"` separated by ';'
  4. NotTerminals describes grammar rules. Each rules for one not terminal have format 
     `NAME {(input_arg # type)*} {(return_arg # type)} -> ((Token | NotTerminal \(input_args\)| {Rust Code})\|)*;`
     You can get access to return args of Token or NotTerminal by position in list of one rule like this `F1_res`
+
